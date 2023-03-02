@@ -1,0 +1,47 @@
+# Dependency directories
+/node_modules
+/.pnp
+.pnp.js
+
+# TypeScript output directory
+/dist
+
+# Editor directories and files
+.vscode
+.idea
+*.sublime-project
+*.sublime-workspace
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs and cache files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp.js
+*.log
+*.pid
+*.seed
+*.sqlite
+
+# Testing files
+/coverage
+
+# Build files
+/build
+/dist
+out
+*.tsbuildinfo
+
+# Miscellaneous
+.DS_Store
+*.tmp
+*.bak
+*.swp
+Thumbs.db
