@@ -1,12 +1,15 @@
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import { MongoClient, ObjectId } from 'mongodb';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 app.use(bodyParser.json());
 
 // Connect to MongoDB
-const client = new MongoClient('mongodb://localhost:27017/mydatabase');
+const uri = process.env.MONGODB_URI || 'mongodb://mongo:27017/latex-api';
+const client = new MongoClient(uri);
 
 async function connectToDatabase() {
   try {
