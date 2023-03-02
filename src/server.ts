@@ -6,7 +6,7 @@ const app = express();
 app.use(bodyParser.json());
 
 // Connect to MongoDB
-const client = new MongoClient('mongodb://localhost:27017');
+const client = new MongoClient('mongodb://localhost:27017/mydatabase');
 
 async function connectToDatabase() {
   try {

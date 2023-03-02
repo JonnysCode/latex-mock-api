@@ -38,6 +38,7 @@ yarn-error.log*
 /dist
 out
 *.tsbuildinfo
+/data
 
 # Miscellaneous
 .DS_Store
