@@ -1,75 +1,91 @@
 import express, { Request, Response } from 'express';
+import bodyParser from 'body-parser';
+import { MongoClient, ObjectId } from 'mongodb';
 
-// Create an instance of Express
 const app = express();
+app.use(bodyParser.json());
 
-// Define an interface for a document object
-interface Document {
-  id: string;
-  name: string;
-  content: string;
+// Connect to MongoDB
+const client = new MongoClient('mongodb://localhost:27017');
+
+async function connectToDatabase() {
+  try {
+    await client.connect();
+    console.log('Connected to MongoDB');
+  } catch (err) {
+    console.error('Failed to connect to MongoDB', err);
+  }
 }
+connectToDatabase();
 
-// Define an array of documents
-const documents: Document[] = [
-  { id: '1', name: 'Document 1', content: 'This is the content of document 1' },
-  { id: '2', name: 'Document 2', content: 'This is the content of document 2' },
-  { id: '3', name: 'Document 3', content: 'This is the content of document 3' },
-];
-
-// Define routes for getting all documents, getting a specific document, creating a new document, updating an existing document, and deleting a document
-app.get('/documents', (req: Request, res: Response) => {
-  res.send(documents);
-});
-
-app.get('/documents/:id', (req: Request, res: Response) => {
-  const document = documents.find((doc) => doc.id === req.params.id);
-
-  if (!document) {
-    res.status(404).send('Document not found');
-  } else {
-    res.send(document);
+// Get a document by ID
+app.get('/documents/:id', async (req: Request, res: Response) => {
+  const id = req.params.id;
+  try {
+    const collection = client.db().collection('documents');
+    const document = await collection.findOne({ _id: new ObjectId(id) });
+    if (document) {
+      res.status(200).send(document.content);
+    } else {
+      res.status(404).send('Document not found');
+    }
+  } catch (err) {
+    console.error('Failed to get document', err);
+    res.status(500).send('Internal server error');
   }
 });
 
-app.post('/documents', (req: Request, res: Response) => {
-  const newDocument: Document = req.body;
-
-  if (!newDocument.id || !newDocument.name || !newDocument.content) {
-    res.status(400).send('Invalid document data');
-  } else {
-    documents.push(newDocument);
-    res.send(newDocument);
+// Create a new document
+app.post('/documents', async (req: Request, res: Response) => {
+  try {
+    const collection = client.db().collection('documents');
+    const result = await collection.insertOne(req.body);
+    res.status(201).send(result.insertedId);
+  } catch (err) {
+    console.error('Failed to create document', err);
+    res.status(500).send('Internal server error');
   }
 });
 
-app.put('/documents/:id', (req: Request, res: Response) => {
-  const documentIndex = documents.findIndex((doc) => doc.id === req.params.id);
-
-  if (documentIndex === -1) {
-    res.status(404).send('Document not found');
-  } else {
-    const updatedDocument: Document = req.body;
-    documents[documentIndex] = {
-      ...documents[documentIndex],
-      ...updatedDocument,
-    };
-    res.send(documents[documentIndex]);
+// Update a document by ID
+app.put('/documents/:id', async (req: Request, res: Response) => {
+  const id = req.params.id;
+  try {
+    const collection = client.db().collection('documents');
+    const result = await collection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { content: req.body.content } }
+    );
+    if (result.matchedCount === 1) {
+      res.status(200).send('Document updated');
+    } else {
+      res.status(404).send('Document not found');
+    }
+  } catch (err) {
+    console.error('Failed to update document', err);
+    res.status(500).send('Internal server error');
   }
 });
 
-app.delete('/documents/:id', (req: Request, res: Response) => {
-  const documentIndex = documents.findIndex((doc) => doc.id === req.params.id);
-
-  if (documentIndex === -1) {
-    res.status(404).send('Document not found');
-  } else {
-    const deletedDocument = documents.splice(documentIndex, 1)[0];
-    res.send(deletedDocument);
+// Delete a document by ID
+app.delete('/documents/:id', async (req: Request, res: Response) => {
+  const id = req.params.id;
+  try {
+    const collection = client.db().collection('documents');
+    const result = await collection.deleteOne({ _id: new ObjectId(id) });
+    if (result.deletedCount === 1) {
+      res.status(200).send('Document deleted');
+    } else {
+      res.status(404).send('Document not found');
+    }
+  } catch (err) {
+    console.error('Failed to delete document', err);
+    res.status(500).send('Internal server error');
   }
 });
 
 // Start the server
-app.listen(3003, () => {
-  console.log('Server listening on port 3003');
+const port = 3003;
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
