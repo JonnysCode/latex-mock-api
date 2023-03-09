@@ -1,10 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
-import { v4 as uuidv4 } from 'uuid';
-import Document from '../models/documentModel';
+const { v4: uuidv4 } = require('uuid');
+const Document = require('../models/documentModel');
 
 class DocumentController {
   // Get all documents
-  async getAllDocuments(req: Request, res: Response, next: NextFunction) {
+  async getAllDocuments(req, res, next) {
     try {
       const documents = await Document.find({});
       res.status(200).json(documents);
@@ -14,7 +13,7 @@ class DocumentController {
   }
 
   // Get a document by id
-  async getDocumentById(req: Request, res: Response, next: NextFunction) {
+  async getDocumentById(req, res, next) {
     const { id } = req.params;
     try {
       const document = await Document.findOne({ id: id });
@@ -29,7 +28,7 @@ class DocumentController {
   }
 
   // Create a new document
-  async createDocument(req: Request, res: Response, next: NextFunction) {
+  async createDocument(req, res, next) {
     const { name, content } = req.body;
     const id = uuidv4();
     try {
@@ -46,7 +45,7 @@ class DocumentController {
   }
 
   // Update an existing document by id
-  async updateDocument(req: Request, res: Response, next: NextFunction) {
+  async updateDocument(req, res, next) {
     const { id } = req.params;
     const { name, content } = req.body;
     try {
@@ -66,7 +65,7 @@ class DocumentController {
   }
 
   // Delete a document by id
-  async deleteDocument(req: Request, res: Response, next: NextFunction) {
+  async deleteDocument(req, res, next) {
     const { id } = req.params;
     try {
       const deletedDocument = await Document.findOneAndDelete({ id: id });
@@ -81,4 +80,4 @@ class DocumentController {
   }
 }
 
-export default DocumentController;
+module.exports = DocumentController;

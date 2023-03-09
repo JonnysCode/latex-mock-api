@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const documentSchema = new mongoose.Schema({
+  id: { type: String, required: true },
   name: { type: String, required: true },
   content: { type: String, required: true },
   created_at: { type: Date, default: Date.now },

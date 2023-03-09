@@ -1,8 +1,9 @@
-import express from 'express';
-import mongoose from 'mongoose';
-import { MONGODB_URI } from './config/dbConfig';
-import documentRoutes from './routes/documentRoutes';
-import errorHandler from './middleware/errorHandler';
+const express = require('express');
+const mongoose = require('mongoose');
+const { MONGODB_URI } = require('./config/dbConfig');
+const documentRoutes = require('./routes/documentRoutes');
+const errorHandler = require('./middleware/errorHandler');
+require('dotenv').config();
 
 const app = express();
 
