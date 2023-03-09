@@ -1,32 +1,34 @@
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import { MongoClient, ObjectId } from 'mongodb';
+import { ObjectId } from 'mongodb';
+import mongoose from 'mongoose';
+import { v4 as uuidv4 } from 'uuid';
 import dotenv from 'dotenv';
+
+import Document from './models/Document';
+
 dotenv.config();
 
 const app = express();
 app.use(bodyParser.json());
 
 // Connect to MongoDB
-const uri = process.env.MONGODB_URI || 'mongodb://mongo:27017/latex-api';
-const client = new MongoClient(uri);
+const uri = process.env.DATABASE_URL || process.env.DEV_DB_URL;
+console.log('Connecting to MongoDB:', uri);
 
-async function connectToDatabase() {
-  try {
-    await client.connect();
-    console.log('Connected to MongoDB');
-  } catch (err) {
-    console.error('Failed to connect to MongoDB', err);
-  }
-}
-connectToDatabase();
+mongoose.connect(uri);
+const db = mongoose.connection;
+
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function () {
+  console.log('Connected to MongoDB on ', uri);
+});
 
 // Get a document by ID
 app.get('/documents/:id', async (req: Request, res: Response) => {
   const id = req.params.id;
   try {
-    const collection = client.db().collection('documents');
-    const document = await collection.findOne({ _id: new ObjectId(id) });
+    const document = await Document.findOne({ id: id });
     if (document) {
       res.status(200).send(document.content);
     } else {
@@ -41,9 +43,13 @@ app.get('/documents/:id', async (req: Request, res: Response) => {
 // Create a new document
 app.post('/documents', async (req: Request, res: Response) => {
   try {
-    const collection = client.db().collection('documents');
-    const result = await collection.insertOne(req.body);
-    res.status(201).send(result.insertedId);
+    const document = new Document({
+      id: uuidv4(),
+      name: req.body.name,
+      content: req.body.content,
+    });
+    const result = await document.save();
+    res.status(201).send(result.id);
   } catch (err) {
     console.error('Failed to create document', err);
     res.status(500).send('Internal server error');
@@ -54,9 +60,8 @@ app.post('/documents', async (req: Request, res: Response) => {
 app.put('/documents/:id', async (req: Request, res: Response) => {
   const id = req.params.id;
   try {
-    const collection = client.db().collection('documents');
-    const result = await collection.updateOne(
-      { _id: new ObjectId(id) },
+    const result = await Document.updateOne(
+      { id: id },
       { $set: { content: req.body.content } }
     );
     if (result.matchedCount === 1) {
@@ -74,8 +79,7 @@ app.put('/documents/:id', async (req: Request, res: Response) => {
 app.delete('/documents/:id', async (req: Request, res: Response) => {
   const id = req.params.id;
   try {
-    const collection = client.db().collection('documents');
-    const result = await collection.deleteOne({ _id: new ObjectId(id) });
+    const result = await Document.deleteOne({ id: id });
     if (result.deletedCount === 1) {
       res.status(200).send('Document deleted');
     } else {
