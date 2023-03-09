@@ -21,7 +21,7 @@ mongoose
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
-    console.log('Connected to database: ', MONGODB_URI);
+    console.log('Connected to database');
   })
   .catch((err) => {
     console.error(err.stack);
