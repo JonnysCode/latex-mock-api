@@ -3,9 +3,13 @@ const mongoose = require('mongoose');
 const { MONGODB_URI } = require('./config/dbConfig');
 const documentRoutes = require('./routes/documentRoutes');
 const errorHandler = require('./middleware/errorHandler');
+const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
+
+// Enable CORS for all routes
+app.use(cors());
 
 app.use(express.json());
 
