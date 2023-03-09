@@ -1,11 +1,16 @@
 const Document = require('../models/documentModel');
 
+function toDocumentJson(document) {
+  const { _id, ...rest } = document.toJSON();
+  return { id: _id, ...rest };
+}
+
 class DocumentController {
   async createDocument(req, res, next) {
     try {
       const { name, content } = req.body;
       const document = await Document.create({ name, content });
-      res.status(201).json({ success: true, data: document });
+      res.status(201).json({ success: true, data: toDocumentJson(document) });
     } catch (error) {
       next(error);
     }
@@ -14,7 +19,10 @@ class DocumentController {
   async getAllDocuments(req, res, next) {
     try {
       const documents = await Document.find();
-      res.status(200).json({ success: true, data: documents });
+      res.status(200).json({
+        success: true,
+        data: documents.map(toDocumentJson),
+      });
     } catch (error) {
       next(error);
     }
@@ -29,7 +37,7 @@ class DocumentController {
           .status(404)
           .json({ success: false, message: 'Document not found' });
       }
-      res.status(200).json({ success: true, data: document });
+      res.status(200).json({ success: true, data: toDocumentJson(document) });
     } catch (error) {
       next(error);
     }
@@ -49,7 +57,9 @@ class DocumentController {
           .status(404)
           .json({ success: false, message: 'Document not found' });
       }
-      res.status(200).json({ success: true, data: updatedDocument });
+      res
+        .status(200)
+        .json({ success: true, data: toDocumentJson(updatedDocument) });
     } catch (error) {
       next(error);
     }
@@ -64,7 +74,9 @@ class DocumentController {
           .status(404)
           .json({ success: false, message: 'Document not found' });
       }
-      res.status(200).json({ success: true, data: deletedDocument });
+      res
+        .status(200)
+        .json({ success: true, data: toDocumentJson(deletedDocument) });
     } catch (error) {
       next(error);
     }
