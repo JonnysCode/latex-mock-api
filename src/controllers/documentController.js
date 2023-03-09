@@ -1,81 +1,72 @@
-const { v4: uuidv4 } = require('uuid');
 const Document = require('../models/documentModel');
 
 class DocumentController {
-  // Get all documents
+  async createDocument(req, res, next) {
+    try {
+      const { name, content } = req.body;
+      const document = await Document.create({ name, content });
+      res.status(201).json({ success: true, data: document });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getAllDocuments(req, res, next) {
     try {
-      const documents = await Document.find({});
-      res.status(200).json(documents);
-    } catch (err) {
-      next(err);
+      const documents = await Document.find();
+      res.status(200).json({ success: true, data: documents });
+    } catch (error) {
+      next(error);
     }
   }
 
-  // Get a document by id
   async getDocumentById(req, res, next) {
-    const { id } = req.params;
     try {
-      const document = await Document.findOne({ id: id });
+      const { id } = req.params;
+      const document = await Document.findById(id);
       if (!document) {
-        res.status(404).json({ message: 'Document not found' });
-        return;
+        return res
+          .status(404)
+          .json({ success: false, message: 'Document not found' });
       }
-      res.status(200).json(document);
-    } catch (err) {
-      next(err);
+      res.status(200).json({ success: true, data: document });
+    } catch (error) {
+      next(error);
     }
   }
 
-  // Create a new document
-  async createDocument(req, res, next) {
-    const { name, content } = req.body;
-    const id = uuidv4();
-    try {
-      const document = new Document({
-        id,
-        name,
-        content,
-      });
-      await document.save();
-      res.status(201).json(document);
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  // Update an existing document by id
   async updateDocument(req, res, next) {
-    const { id } = req.params;
-    const { name, content } = req.body;
     try {
-      const updatedDocument = await Document.findOneAndUpdate(
-        { id: id },
+      const { id } = req.params;
+      const { name, content } = req.body;
+      const updatedDocument = await Document.findByIdAndUpdate(
+        id,
         { name, content, updated_at: Date.now() },
         { new: true }
       );
       if (!updatedDocument) {
-        res.status(404).json({ message: 'Document not found' });
-        return;
+        return res
+          .status(404)
+          .json({ success: false, message: 'Document not found' });
       }
-      res.status(200).json(updatedDocument);
-    } catch (err) {
-      next(err);
+      res.status(200).json({ success: true, data: updatedDocument });
+    } catch (error) {
+      next(error);
     }
   }
 
-  // Delete a document by id
   async deleteDocument(req, res, next) {
-    const { id } = req.params;
     try {
-      const deletedDocument = await Document.findOneAndDelete({ id: id });
+      const { id } = req.params;
+      const deletedDocument = await Document.findByIdAndDelete(id);
       if (!deletedDocument) {
-        res.status(404).json({ message: 'Document not found' });
-        return;
+        return res
+          .status(404)
+          .json({ success: false, message: 'Document not found' });
       }
-      res.status(204).send();
-    } catch (err) {
-      next(err);
+      res.status(200).json({ success: true, data: deletedDocument });
+    } catch (error) {
+      next(error);
     }
   }
 }
