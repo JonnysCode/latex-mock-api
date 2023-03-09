@@ -15,8 +15,6 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 3003;
 
-console.log('URI: ', MONGODB_URI);
-
 mongoose
   .connect(MONGODB_URI)
   .then(() => {
